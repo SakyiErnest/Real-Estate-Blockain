@@ -1,0 +1,57 @@
+/* Confetti animation */
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+.confettiPiece {
+  position: absolute;
+  top: 0;
+  border-radius: 0.125rem;
+}
+
+/* Dynamic confetti styles - these will be applied via JavaScript */
+.confettiAnimation {
+  animation: confetti-fall var(--animation-duration) ease-in forwards;
+  animation-delay: var(--animation-delay);
+  transform: rotate(var(--rotation-angle));
+  width: var(--confetti-size);
+  height: var(--confetti-size);
+  left: var(--confetti-left);
+  background-color: var(--confetti-color);
+}
+
+/* Progress bar */
+.progressBar {
+  height: 100%;
+  transition-property: all;
+  transition-duration: 500ms;
+  transition-timing-function: ease-in-out;
+}
+
+.progressBarSuccess {
+  background-color: rgb(79, 70, 229); /* bg-indigo-600 */
+}
+
+.progressBarFailed {
+  background-color: rgb(239, 68, 68); /* bg-red-500 */
+}
+
+/* Progress width classes */
+.progressWidth25 {
+  width: 25%;
+}
+
+.progressWidth65 {
+  width: 65%;
+}
+
+.progressWidth100 {
+  width: 100%;
+}
