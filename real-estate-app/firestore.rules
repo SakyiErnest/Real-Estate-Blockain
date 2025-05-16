@@ -8,37 +8,48 @@ service cloud.firestore {
       allow update: if request.auth != null && (request.auth.uid == userId || isAdmin());
       allow delete: if request.auth != null && isAdmin();
     }
-    
-    // Properties - anyone can read, only admins can write
+
+    // Properties - anyone can read, owners can write their own properties
     match /properties/{propertyId} {
       allow read: if true;
-      allow write: if request.auth != null && isAdmin();
+
+      // Allow creation if the user is authenticated and sets themselves as the owner
+      allow create: if request.auth != null &&
+                     request.resource.data.ownerId == request.auth.uid;
+
+      // Allow updates if the user is the owner of the property
+      allow update: if request.auth != null &&
+                     resource.data.ownerId == request.auth.uid;
+
+      // Allow deletion if the user is the owner of the property
+      allow delete: if request.auth != null &&
+                     resource.data.ownerId == request.auth.uid;
     }
-    
+
     // Transactions - users can read their own transactions, only system can write
     match /transactions/{transactionId} {
       allow read: if request.auth != null && (
-        request.auth.uid == resource.data.buyerId || 
-        request.auth.uid == resource.data.sellerId || 
+        request.auth.uid == resource.data.buyerId ||
+        request.auth.uid == resource.data.sellerId ||
         isAdmin()
       );
-      
+
       // Allow creation if the user is the buyer
       allow create: if request.auth != null && request.auth.uid == request.resource.data.buyerId;
-      
+
       // Allow updates only if status is being changed and user is involved in the transaction
       allow update: if request.auth != null && (
         (request.auth.uid == resource.data.buyerId || request.auth.uid == resource.data.sellerId) &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt', 'confirmations', 'txHash'])
       );
-      
+
       // Only admins can delete transactions
       allow delete: if request.auth != null && isAdmin();
     }
-    
+
     // Helper function to check if user is an admin
     function isAdmin() {
-      return request.auth != null && 
+      return request.auth != null &&
         exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
