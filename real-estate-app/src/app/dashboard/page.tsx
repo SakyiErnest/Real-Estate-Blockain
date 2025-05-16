@@ -1,40 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { auth } from '@/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { PlusIcon, HomeIcon, CurrencyDollarIcon, UserIcon } from '@heroicons/react/24/outline';
+import { getUserProperties } from '@/lib/propertyService';
+import PropertyCard from '@/components/properties/PropertyCard';
 
-// Sample user properties data (in a real app, this would come from an API or database)
-const userProperties = [
-  {
-    id: '101',
-    title: 'Modern Apartment in Downtown',
-    description: 'Spacious 2-bedroom apartment with city views',
-    price: 450000,
-    location: 'San Francisco, CA',
-    bedrooms: 2,
-    bathrooms: 2,
-    size: 1200,
-    imageUrl: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80',
-    status: 'active',
-  },
-  {
-    id: '102',
-    title: 'Cozy Suburban Home',
-    description: 'Beautiful 3-bedroom house with a backyard',
-    price: 520000,
-    location: 'Portland, OR',
-    bedrooms: 3,
-    bathrooms: 2,
-    size: 1800,
-    imageUrl: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2075&q=80',
-    status: 'pending',
-  },
-];
+// We'll fetch real property data from Firebase
 
 // Sample transaction data (in a real app, this would come from an API or database)
 const transactions = [
@@ -61,6 +37,8 @@ export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('properties');
+  const [userProperties, setUserProperties] = useState<any[]>([]);
+  const [propertiesLoading, setPropertiesLoading] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -74,6 +52,35 @@ export default function DashboardPage() {
 
     return () => unsubscribe();
   }, [router]);
+
+  // Fetch user properties when user is authenticated
+  useEffect(() => {
+    const fetchUserProperties = async () => {
+      if (!user) return;
+
+      setPropertiesLoading(true);
+      try {
+        const properties = await getUserProperties(user.uid);
+        setUserProperties(properties);
+      } catch (error) {
+        console.error('Error fetching user properties:', error);
+      } finally {
+        setPropertiesLoading(false);
+      }
+    };
+
+    fetchUserProperties();
+  }, [user]);
+
+  // Handle property deletion
+  const handlePropertyDeleted = () => {
+    // Refresh the properties list
+    if (user) {
+      getUserProperties(user.uid)
+        .then(properties => setUserProperties(properties))
+        .catch(error => console.error('Error refreshing properties:', error));
+    }
+  };
 
   if (loading) {
     return (
@@ -101,6 +108,7 @@ export default function DashboardPage() {
         <div className="border-b border-gray-200">
           <nav className="-mb-px flex space-x-8" aria-label="Tabs">
             <button
+              type="button"
               onClick={() => setActiveTab('properties')}
               className={`${
                 activeTab === 'properties'
@@ -111,6 +119,7 @@ export default function DashboardPage() {
               My Properties
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab('transactions')}
               className={`${
                 activeTab === 'transactions'
@@ -121,6 +130,7 @@ export default function DashboardPage() {
               Transactions
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab('profile')}
               className={`${
                 activeTab === 'profile'
@@ -149,7 +159,11 @@ export default function DashboardPage() {
                 </Link>
               </div>
 
-              {userProperties.length === 0 ? (
+              {propertiesLoading ? (
+                <div className="flex justify-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+                </div>
+              ) : userProperties.length === 0 ? (
                 <div className="text-center py-12 bg-white rounded-lg shadow">
                   <HomeIcon className="mx-auto h-12 w-12 text-gray-400" aria-hidden="true" />
                   <h3 className="mt-2 text-lg font-medium text-gray-900">No properties yet</h3>
@@ -167,49 +181,11 @@ export default function DashboardPage() {
               ) : (
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {userProperties.map((property) => (
-                    <div key={property.id} className="bg-white overflow-hidden shadow rounded-lg">
-                      <div className="relative h-48">
-                        <Image
-                          src={property.imageUrl}
-                          alt={property.title}
-                          fill
-                          className="object-cover"
-                        />
-                        <div className="absolute top-2 right-2">
-                          <span
-                            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                              property.status === 'active'
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-yellow-100 text-yellow-800'
-                            }`}
-                          >
-                            {property.status === 'active' ? 'Active' : 'Pending'}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="p-4">
-                        <h3 className="text-lg font-semibold text-gray-900">{property.title}</h3>
-                        <p className="mt-1 text-sm text-gray-500">{property.location}</p>
-                        <p className="mt-1 text-sm text-gray-500">
-                          {property.bedrooms} bd | {property.bathrooms} ba | {property.size} sqft
-                        </p>
-                        <p className="mt-2 text-lg font-medium text-indigo-600">${property.price.toLocaleString()}</p>
-                        <div className="mt-4 flex space-x-3">
-                          <Link
-                            href={`/properties/${property.id}`}
-                            className="inline-flex flex-1 justify-center items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                          >
-                            View
-                          </Link>
-                          <Link
-                            href={`/properties/${property.id}/edit`}
-                            className="inline-flex flex-1 justify-center items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                          >
-                            Edit
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
+                    <PropertyCard
+                      key={property.id}
+                      property={property}
+                      onDelete={handlePropertyDeleted}
+                    />
                   ))}
                 </div>
               )}
@@ -220,7 +196,7 @@ export default function DashboardPage() {
           {activeTab === 'transactions' && (
             <div>
               <h2 className="text-xl font-semibold text-gray-900 mb-6">Transaction History</h2>
-              
+
               {transactions.length === 0 ? (
                 <div className="text-center py-12 bg-white rounded-lg shadow">
                   <CurrencyDollarIcon className="mx-auto h-12 w-12 text-gray-400" aria-hidden="true" />
@@ -290,7 +266,7 @@ export default function DashboardPage() {
           {activeTab === 'profile' && (
             <div>
               <h2 className="text-xl font-semibold text-gray-900 mb-6">Profile Information</h2>
-              
+
               <div className="bg-white shadow overflow-hidden sm:rounded-lg">
                 <div className="px-4 py-5 sm:px-6">
                   <div className="flex items-center">

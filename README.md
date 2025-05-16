@@ -73,7 +73,14 @@ NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your_firebase_measurement_id
 
 # Ethereum Configuration
 NEXT_PUBLIC_ETHEREUM_RPC_URL=your_ethereum_rpc_url
+
+# Cloudinary Configuration (for image storage)
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
+NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=real_estate_app
+NEXT_PUBLIC_CLOUDINARY_API_KEY=your_api_key
 ```
+
+See [Cloudinary Setup Guide](./docs/CLOUDINARY_SETUP.md) for detailed instructions on setting up Cloudinary for image storage.
 
 ## Running the Application
 
