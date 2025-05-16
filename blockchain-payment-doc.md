@@ -1,4 +1,4 @@
-# Blockchain Payment System Documentation
+No code was selected, and the provided text is a documentation file. There is no code to improve.# Blockchain Payment System Documentation
 
 ## Introduction
 
@@ -26,33 +26,38 @@ Our platform implements a streamlined process for cryptocurrency payments in rea
 6. **Status Updates**: Users receive real-time updates on transaction status
 
 ```
-[User] → [Connect Wallet] → [Select Property] → [Submit Offer] → [Confirm in MetaMask] 
+[User] → [Connect Wallet] → [Select Property] → [Submit Offer] → [Confirm in MetaMask]
          → [Blockchain Processing] → [Transaction Confirmation] → [Property Ownership Transfer]
 ```
 
 ## Tools & APIs Used
 
 ### MetaMask Integration
+
 **Purpose**: Wallet connection and transaction signing  
 **Why Chosen**: Industry-standard wallet with broad adoption and robust security features  
 **Benefits**: Seamless user experience, secure key management, and widespread familiarity among crypto users
 
 ### Web3.js & Ethers.js
+
 **Purpose**: JavaScript libraries for interacting with the Ethereum blockchain  
 **Why Chosen**: Comprehensive functionality, active maintenance, and strong community support  
 **Benefits**: Reliable blockchain interactions, robust error handling, and support for various transaction types
 
 ### Firebase Firestore
+
 **Purpose**: Secure database for storing transaction records and user information  
 **Why Chosen**: Real-time data synchronization, scalable infrastructure, and seamless integration with our authentication system  
 **Benefits**: Persistent transaction records, real-time status updates, and secure data storage
 
 ### Next.js API Routes
+
 **Purpose**: Secure server-side endpoints for transaction processing  
 **Why Chosen**: Serverless architecture, built-in security features, and seamless integration with our frontend  
 **Benefits**: Protected API endpoints, reduced attack surface, and optimized performance
 
 ### CoinGecko API
+
 **Purpose**: Real-time cryptocurrency price data  
 **Why Chosen**: Reliable data source, comprehensive currency coverage, and free tier availability  
 **Benefits**: Accurate price conversions, support for multiple cryptocurrencies, and real-time market data
